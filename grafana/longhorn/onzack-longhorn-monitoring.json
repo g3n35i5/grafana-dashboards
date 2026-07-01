@@ -85,6 +85,1023 @@
         "x": 0,
         "y": 0
       },
+      "id": 100,
+      "panels": [],
+      "title": "Backups",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Longhorn volumes bound to a PVC in the selected Namespace/PVC scope. These are the volumes we expect to be backed up. NOTE: Longhorn does not export backup POLICY as a metric - this dashboard measures observed backup COVERAGE (via longhorn_volume_last_backup_at).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 101,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}) OR on() vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Volumes (backup-expected)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Volumes with a successful backup within the 'Stale after' window.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "id": 102,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(\n  ((time() - longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}) <= $stale_after)\n  and (longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} > 0)\n) OR on() vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "With Recent Backup",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Volumes that DO have backups, but the newest one is older than the 'Stale after' window - backups are falling behind schedule.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 103,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(\n  ((time() - longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}) > $stale_after)\n  and (longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} > 0)\n) OR on() vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Stale Backup",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Backup-expected volumes that have NEVER been backed up (longhorn_volume_last_backup_at == 0). Either not covered by a backup policy, or the first run hasn't happened yet. Deselect known-OK namespaces/PVCs above to keep this at 0.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 104,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} == 0) OR on() vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Without Any Backup",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Longhorn Backup CRs currently in the Error state (longhorn_backup_state == 4), for the selected Backup Job(s) and Namespace/PVC scope.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 105,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(\n  (longhorn_backup_state{recurring_job=~\"$recurring_job\"} == 4)\n  and on(volume) longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}\n) OR on() vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Backup Jobs",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Age of the oldest successful backup among backup-expected volumes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 86400
+              },
+              {
+                "color": "red",
+                "value": 93600
+              }
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 106,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max(\n  (time() - longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"})\n  and (longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} > 0)\n) OR on() vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Oldest Backup Age",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Every backup-expected Longhorn PVC and the age of its last successful backup. 'Never' (red) = no backup has ever completed for this volume. Sorted worst-first.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Backup Size"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last Backup"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "range",
+                    "options": {
+                      "from": 315360000,
+                      "to": 99999999999,
+                      "result": {
+                        "text": "Never",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 86400
+                    },
+                    {
+                      "color": "red",
+                      "value": 93600
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 0,
+        "y": 5
+      },
+      "id": 110,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Last Backup",
+            "desc": true
+          }
+        ]
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max by (pvc_namespace, pvc, volume) (\n  time() - longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}\n)",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (pvc_namespace, pvc, volume) (\n  (longhorn_backup_actual_size_bytes\n  * on(volume) group_left(pvc, pvc_namespace) (max by(volume, pvc, pvc_namespace)(longhorn_volume_capacity_bytes) > bool 0))\n  and on(volume) longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}\n)",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        }
+      ],
+      "title": "PVC Backup Coverage",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "container": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "namespace": true,
+              "node": true,
+              "pod": true,
+              "service": true,
+              "volume": true
+            },
+            "indexByName": {
+              "pvc_namespace": 0,
+              "pvc": 1,
+              "Value #A": 2,
+              "Value #B": 3
+            },
+            "renameByName": {
+              "pvc_namespace": "Namespace",
+              "pvc": "PVC",
+              "Value #A": "Last Backup",
+              "Value #B": "Backup Size"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Per recurring backup job (backup 'group'): number of Backup CRs tracked, how many are in Error state, and total storage consumed. Filtered by the Backup Job variable. Counts ALL Backup CRs including orphaned ones (volumes already deleted) - so 'Failed' here can exceed the 'Failed Backup Jobs' stat, which only counts failures for volumes that still exist. '(manual / no recurring job)' = backups not created by a recurring job.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Recurring Job"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 220
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total Size"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "0",
+                        "index": 0
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "id": 111,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "label_replace(count by (recurring_job) (longhorn_backup_state{recurring_job=~\"$recurring_job\"}), \"recurring_job\", \"(manual / no recurring job)\", \"recurring_job\", \"^$\")",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "label_replace(\n  (count by (recurring_job) (longhorn_backup_state{recurring_job=~\"$recurring_job\"} == 4))\n  or\n  (0 * count by (recurring_job) (longhorn_backup_state{recurring_job=~\"$recurring_job\"}))\n, \"recurring_job\", \"(manual / no recurring job)\", \"recurring_job\", \"^$\")",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "label_replace(sum by (recurring_job) (longhorn_backup_actual_size_bytes{recurring_job=~\"$recurring_job\"}), \"recurring_job\", \"(manual / no recurring job)\", \"recurring_job\", \"^$\")",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Backup Jobs Overview",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "container": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "namespace": true,
+              "pod": true,
+              "service": true
+            },
+            "indexByName": {
+              "recurring_job": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3
+            },
+            "renameByName": {
+              "recurring_job": "Recurring Job",
+              "Value #A": "Backups",
+              "Value #B": "Failed",
+              "Value #C": "Total Size"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Longhorn Backup CRs currently in Error (4) or Unknown (5) state, mapped to their PVC. Filtered by Backup Job + Namespace/PVC. Backup CR names (generic UIDs) are omitted; recurring_job shows which schedule produced it ('' = manual/on-demand).",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "color": "blue",
+                  "index": 0,
+                  "text": "New"
+                },
+                "1": {
+                  "color": "orange",
+                  "index": 1,
+                  "text": "Pending"
+                },
+                "2": {
+                  "color": "yellow",
+                  "index": 2,
+                  "text": "InProgress"
+                },
+                "3": {
+                  "color": "green",
+                  "index": 3,
+                  "text": "Completed"
+                },
+                "4": {
+                  "color": "red",
+                  "index": 4,
+                  "text": "Error"
+                },
+                "5": {
+                  "color": "#808080",
+                  "index": 5,
+                  "text": "Unknown"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "State"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Recurring Job"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 112,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "(\n  (longhorn_backup_state{recurring_job=~\"$recurring_job\"} >= 4)\n  * on(volume) group_left(pvc, pvc_namespace) (max by(volume, pvc, pvc_namespace)(longhorn_volume_capacity_bytes) > bool 0)\n)\nand on(volume) longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Backup Jobs Needing Attention",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "backup": true,
+              "container": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "namespace": true,
+              "node": true,
+              "pod": true,
+              "service": true,
+              "volume": true
+            },
+            "indexByName": {
+              "pvc_namespace": 0,
+              "pvc": 1,
+              "recurring_job": 2,
+              "Value": 3
+            },
+            "renameByName": {
+              "pvc_namespace": "Namespace",
+              "pvc": "PVC",
+              "recurring_job": "Recurring Job",
+              "Value": "State"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Total backup storage consumed per PVC (sum of all backup revisions) on the external backup target. Filtered by Backup Job + Namespace/PVC.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 113,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (pvc_namespace, pvc) (\n  (longhorn_backup_actual_size_bytes{recurring_job=~\"$recurring_job\"}\n  * on(volume) group_left(pvc, pvc_namespace) (max by(volume, pvc, pvc_namespace)(longhorn_volume_capacity_bytes) > bool 0))\n  and on(volume) longhorn_volume_last_backup_at{pvc!=\"\",pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}\n)",
+          "legendFormat": "{{pvc_namespace}}/{{pvc}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Backup Storage Used by PVC",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
       "id": 49,
       "title": "Volumes",
       "type": "row"
@@ -113,7 +1130,7 @@
         "h": 6,
         "w": 4,
         "x": 0,
-        "y": 1
+        "y": 22
       },
       "id": 8,
       "options": {
@@ -141,7 +1158,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(longhorn_volume_capacity_bytes{volume=~\"$volume\"}) OR on() vector(0)",
+          "expr": "count(longhorn_volume_capacity_bytes{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}) OR on() vector(0)",
           "interval": "",
           "legendFormat": "",
           "range": true,
@@ -179,7 +1196,7 @@
         "h": 6,
         "w": 4,
         "x": 4,
-        "y": 1
+        "y": 22
       },
       "id": 13,
       "options": {
@@ -207,7 +1224,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(\r\n  (longhorn_volume_robustness{volume=~\"$volume\"} == 1)\r\n  or\r\n  (longhorn_volume_robustness{volume=~\"$volume\", robustness=\"healthy\"} == 1)\r\n) OR on() vector(0)",
+          "expr": "count(\r\n  (longhorn_volume_robustness{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} == 1)\r\n  or\r\n  (longhorn_volume_robustness{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\", robustness=\"healthy\"} == 1)\r\n) OR on() vector(0)",
           "interval": "",
           "legendFormat": "",
           "range": true,
@@ -284,7 +1301,7 @@
         "h": 9,
         "w": 16,
         "x": 8,
-        "y": 1
+        "y": 22
       },
       "id": 12,
       "options": {
@@ -317,7 +1334,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "( (avg by (volume) (longhorn_volume_actual_size_bytes{volume=~\"$volume\"}))/ (avg by (volume) (longhorn_volume_capacity_bytes{volume=~\"$volume\"})) ) *100",
+          "expr": "( (avg by (volume) (longhorn_volume_actual_size_bytes{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"}))/ (avg by (volume) (longhorn_volume_capacity_bytes{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"})) ) *100",
           "interval": "",
           "legendFormat": "",
           "range": true,
@@ -355,7 +1372,7 @@
         "h": 6,
         "w": 4,
         "x": 0,
-        "y": 7
+        "y": 28
       },
       "id": 15,
       "options": {
@@ -383,7 +1400,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(\r\n  (longhorn_volume_robustness{volume=~\"$volume\"} == 2)\r\n  or\r\n  (longhorn_volume_robustness{volume=~\"$volume\", robustness=\"degraded\"} == 1)\r\n) OR on() vector(0)",
+          "expr": "count(\r\n  (longhorn_volume_robustness{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} == 2)\r\n  or\r\n  (longhorn_volume_robustness{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\", robustness=\"degraded\"} == 1)\r\n) OR on() vector(0)",
           "interval": "",
           "legendFormat": "",
           "range": true,
@@ -421,7 +1438,7 @@
         "h": 6,
         "w": 4,
         "x": 4,
-        "y": 7
+        "y": 28
       },
       "id": 16,
       "options": {
@@ -449,7 +1466,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(\r\n  (longhorn_volume_robustness{volume=~\"$volume\"} == 3)\r\n  or\r\n  (longhorn_volume_robustness{volume=~\"$volume\", robustness=\"faulted\"} == 1)\r\n) OR on() vector(0)",
+          "expr": "count(\r\n  (longhorn_volume_robustness{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} == 3)\r\n  or\r\n  (longhorn_volume_robustness{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\", robustness=\"faulted\"} == 1)\r\n) OR on() vector(0)",
           "interval": "",
           "legendFormat": "",
           "range": true,
@@ -563,7 +1580,7 @@
         "h": 9,
         "w": 16,
         "x": 8,
-        "y": 10
+        "y": 31
       },
       "id": 10,
       "options": {
@@ -585,7 +1602,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "avg by (pvc_namespace, pvc, volume) (longhorn_volume_capacity_bytes{volume=~\"$volume\"})",
+          "expr": "avg by (pvc_namespace, pvc, volume) (longhorn_volume_capacity_bytes{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"})",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -614,7 +1631,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "100 *\r\n  label_replace(\r\n    avg by (volume, namespace, persistentvolumeclaim) (kubelet_volume_stats_used_bytes), \"pvc\", \"$1\", \"persistentvolumeclaim\", \"(.*)\"\r\n  )\r\n/ on (namespace, pvc)\r\n  label_replace(\r\n    avg by (pvc_namespace, pvc) (\r\n      longhorn_volume_capacity_bytes{volume=~\"$volume\"} and on (volume) (longhorn_volume_state != 3)\r\n    ),\r\n    \"namespace\", \"$1\", \"pvc_namespace\", \"(.*)\"\r\n  )",
+          "expr": "100 *\r\n  label_replace(\r\n    avg by (volume, namespace, persistentvolumeclaim) (kubelet_volume_stats_used_bytes), \"pvc\", \"$1\", \"persistentvolumeclaim\", \"(.*)\"\r\n  )\r\n/ on (namespace, pvc)\r\n  label_replace(\r\n    avg by (pvc_namespace, pvc) (\r\n      longhorn_volume_capacity_bytes{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} and on (volume) (longhorn_volume_state != 3)\r\n    ),\r\n    \"namespace\", \"$1\", \"pvc_namespace\", \"(.*)\"\r\n  )",
           "format": "table",
           "instant": true,
           "legendFormat": "{{volume}}",
@@ -709,7 +1726,7 @@
         "h": 6,
         "w": 4,
         "x": 0,
-        "y": 13
+        "y": 34
       },
       "id": 34,
       "options": {
@@ -737,7 +1754,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(\r\n  (longhorn_volume_state{volume=~\"$volume\"} == 2)\r\n  or\r\n  (longhorn_volume_state{volume=~\"$volume\", state=\"attached\"} == 1)\r\n) OR on() vector(0)",
+          "expr": "count(\r\n  (longhorn_volume_state{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} == 2)\r\n  or\r\n  (longhorn_volume_state{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\", state=\"attached\"} == 1)\r\n) OR on() vector(0)",
           "interval": "",
           "legendFormat": "",
           "range": true,
@@ -775,7 +1792,7 @@
         "h": 6,
         "w": 4,
         "x": 4,
-        "y": 13
+        "y": 34
       },
       "id": 14,
       "options": {
@@ -803,7 +1820,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "count(\r\n  (longhorn_volume_state{volume=~\"$volume\"} == 3)\r\n  or\r\n  (longhorn_volume_state{volume=~\"$volume\", state=\"detached\"} == 1)\r\n) OR on() vector(0)",
+          "expr": "count(\r\n  (longhorn_volume_state{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\"} == 3)\r\n  or\r\n  (longhorn_volume_state{pvc_namespace=~\"$namespace\",pvc=~\"$pvc\", state=\"detached\"} == 1)\r\n) OR on() vector(0)",
           "interval": "",
           "legendFormat": "",
           "range": true,
@@ -819,7 +1836,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 40
       },
       "id": 50,
       "panels": [
@@ -1402,7 +2419,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 41
       },
       "id": 51,
       "panels": [
@@ -1626,7 +2643,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 42
       },
       "id": 52,
       "panels": [
@@ -2294,7 +3311,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 43
       },
       "id": 53,
       "panels": [
@@ -2335,12 +3352,13 @@
     }
   ],
   "preload": false,
-  "refresh": "5m",
+  "refresh": "1m",
   "schemaVersion": 42,
   "tags": [
     "Storage",
     "K8s",
-    "Longhorn"
+    "Longhorn",
+    "Backup"
   ],
   "templating": {
     "list": [
@@ -2361,26 +3379,125 @@
         "type": "datasource"
       },
       {
-        "allowCustomValue": true,
-        "current": {},
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(longhorn_volume_state,volume)",
+        "definition": "label_values(longhorn_volume_state, pvc_namespace)",
+        "description": "Namespace filter. Scopes the whole dashboard (volume + backup panels). Deselect a namespace to exclude it.",
         "includeAll": true,
-        "label": "Volume",
+        "label": "Namespace",
         "multi": true,
-        "name": "volume",
+        "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(longhorn_volume_state,volume)",
+          "query": "label_values(longhorn_volume_state, pvc_namespace)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
         "regex": "",
         "sort": 1,
         "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(longhorn_volume_state{pvc_namespace=~\"$namespace\"}, pvc)",
+        "description": "PVC filter (friendly names, chained to the selected namespace). Replaces the old volume-UUID selector.",
+        "includeAll": true,
+        "label": "PVC",
+        "multi": true,
+        "name": "pvc",
+        "options": [],
+        "query": {
+          "query": "label_values(longhorn_volume_state{pvc_namespace=~\"$namespace\"}, pvc)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(longhorn_backup_state, recurring_job)",
+        "description": "Backup job/group filter (the recurring job that created each backup; empty = manual/on-demand). Drives the backup-job panels. NOTE: the per-volume coverage metric has no recurring_job label, so the coverage panels are filtered by Namespace/PVC only.",
+        "includeAll": true,
+        "label": "Backup Job",
+        "multi": true,
+        "name": "recurring_job",
+        "options": [],
+        "query": {
+          "query": "label_values(longhorn_backup_state, recurring_job)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "26h",
+          "value": "93600",
+          "selected": true
+        },
+        "description": "A backed-up PVC is considered stale if its last successful backup is older than this.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Stale after",
+        "name": "stale_after",
+        "options": [
+          {
+            "text": "26h",
+            "value": "93600",
+            "selected": true
+          },
+          {
+            "text": "48h",
+            "value": "172800",
+            "selected": false
+          },
+          {
+            "text": "7d",
+            "value": "604800",
+            "selected": false
+          }
+        ],
+        "query": "26h : 93600, 48h : 172800, 7d : 604800",
+        "type": "custom"
       }
     ]
   },
@@ -2403,7 +3520,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Longhorn Monitoring",
+  "title": "Longhorn Monitoring & Backups",
   "uid": "ozk-lh-mon",
   "version": 32,
   "weekStart": ""
