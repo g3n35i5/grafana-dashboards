@@ -3452,16 +3452,16 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(longhorn_volume_state{pvc=~\"$namespace\"},volume)",
+        "definition": "label_values(longhorn_volume_state{pvc_namespace=~\"$namespace\", pvc=~\"$pvc\"},volume)",
         "description": "PV filter (UUID, chained to the selected namespace).",
         "includeAll": true,
-        "label": "PV-Name",
+        "label": "PV",
         "multi": true,
         "name": "pv_name",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(longhorn_volume_state{pvc=~\"$namespace\"},volume)",
+          "query": "label_values(longhorn_volume_state{pvc_namespace=~\"$namespace\", pvc=~\"$pvc\"},volume)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
@@ -3547,6 +3547,6 @@
   "timezone": "browser",
   "title": "Longhorn Monitoring & Backups",
   "uid": "ozk-lh-mon",
-  "version": 33,
+  "version": 34,
   "weekStart": ""
 }
