@@ -3453,7 +3453,7 @@
           "uid": "${datasource}"
         },
         "definition": "label_values(longhorn_volume_state{pvc_namespace=~\"$namespace\", pvc=~\"$pvc\"},volume)",
-        "description": "PV filter (UUID, chained to the selected namespace).",
+        "description": "PV filter (UUID, chained to the selected namespace and pvc-name).",
         "includeAll": true,
         "label": "PV",
         "multi": true,
@@ -3547,6 +3547,6 @@
   "timezone": "browser",
   "title": "Longhorn Monitoring & Backups",
   "uid": "ozk-lh-mon",
-  "version": 34,
+  "version": 35,
   "weekStart": ""
 }
